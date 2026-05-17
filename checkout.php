@@ -1,130 +1,77 @@
-<?php include 'config.php'; ?>
-
 <?php
+include 'config.php';
+include 'header.php';
 
-if(isset($_POST['submit'])){
-
-    $name = $_POST['name'];
-    $gcash = $_POST['gcash'];
-    $total = $_POST['total'];
-
-    mysqli_query($conn,
-    "INSERT INTO orders(customer_name,gcash_number,total)
-    VALUES('$name','$gcash','$total')");
-
-    echo "<script>alert('Order Placed!')</script>";
+if(!isset($_SESSION['user_id'])){
+    header("Location: login.php");
+    exit();
 }
-
 ?>
 
-<!DOCTYPE html>
-<html>
+<div class="max-w-xl mx-auto py-12 px-4">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        <div class="bg-blue-600 p-8 text-white text-center">
+            <h1 class="text-3xl font-extrabold mb-2">Finalize Your Order</h1>
+            <p class="opacity-80">Secure Payment via GCash</p>
+        </div>
+        
+        <div class="p-8">
+            <div id="checkoutSummary" class="mb-8 p-4 bg-gray-50 rounded-lg">
+                <div class="flex justify-between items-center text-gray-600 mb-2">
+                    <span>Items Subtotal:</span>
+                    <span id="summaryTotal">₱0.00</span>
+                </div>
+                <div class="flex justify-between items-center text-lg font-bold text-gray-900 border-t pt-2">
+                    <span>Grand Total:</span>
+                    <span id="grandTotal" class="text-blue-600">₱0.00</span>
+                </div>
+            </div>
 
-<head>
-    <title>Checkout</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="ui_improvements.css">
-</head>
-
-<body>
-
-
-<div class="logo-container" style="justify-content:center;">
-    <img src="images/logo.jpg" class="logo" alt="Eunoia IA Logo">
-    <span style="font-size:2em;font-weight:bold;vertical-align:middle;">GCash Checkout</span>
+            <form id="checkoutForm" class="space-y-4">
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-bold text-gray-700">GCash Registered Name</label>
+                    <input type="text" id="customer_name" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="John Doe">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-bold text-gray-700">GCash Mobile Number</label>
+                    <input type="text" id="gcash_number" required class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="09XX XXX XXXX">
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100 mt-4">
+                    Confirm & Pay
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<form method="POST" style="width:300px;margin:auto;">
-    <img src="images/gcash.png" style="width:100%;margin-bottom:20px;">
-    <input type="text" name="name" placeholder="Full Name" required>
-    <br><br>
-    <input type="text" name="gcash" placeholder="Your GCash Number" required>
-    <br><br>
-    <input type="number" name="total" placeholder="Total Amount" required>
-    <br><br>
-    <button name="submit">Pay Now</button>
+<script>
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    document.getElementById('summaryTotal').innerText = "₱" + total.toLocaleString();
+    document.getElementById('grandTotal').innerText = "₱" + total.toLocaleString();
 
-<?php
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        fetch('process_order.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cart: cart,
+                total: total
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                localStorage.removeItem('cart');
+                window.location.href = 'receipt.php?id=' + data.order_id;
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    });
+</script>
 
-if(isset($_POST['submit'])){
-
-$name = $_POST['name'];
-$gcash = $_POST['gcash'];
-$total = $_POST['total'];
-
-mysqli_query($conn,
-
-"INSERT INTO orders
-(customer_name,gcash_number,total)
-
-VALUES
-('$name','$gcash','$total')");
-
-echo "<script>
-alert('Order Placed!');
-</script>";
-
-}
-
-?>
-
-<!DOCTYPE html>
-<html>
-
-<head>
-
-<title>Checkout</title>
-
-<link rel="stylesheet"
-href="style.css">
-
-</head>
-
-<body>
-
-<form method="POST"
-style="width:300px;margin:auto;">
-
-<h1>GCash Checkout</h1>
-
-<img src="images/gcash.png"
-style="width:100%;">
-
-<br><br>
-
-<input type="text"
-name="name"
-placeholder="Full Name"
-required>
-
-<br><br>
-
-<input type="text"
-name="gcash"
-placeholder="Your GCash Number"
-required>
-
-<br><br>
-
-<input type="number"
-name="total"
-placeholder="Total Amount"
-required>
-
-<br><br>
-
-<button name="submit">
-
-Pay Now
-
-</button>
-
-</form>
-
-</body>
-</html>
-
-</form>
-
-</body>
-</html>
+<?php include 'footer.php'; ?>

@@ -1,27 +1,14 @@
 <?php
 include 'config.php';
-include 'header.php';
-?>
 
-<div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Featured Products</h1>
-    <p class="text-gray-600">Discover the best styles curated for you.</p>
-</div>
+$category = $_GET['category'] ?? 'All';
 
-<!-- Category Filter -->
-<div class="flex flex-wrap gap-4 mb-8">
-    <button onclick="filterCategory('All')" class="category-btn bg-blue-600 text-white px-6 py-2 rounded-full font-medium shadow-sm transition hover:bg-blue-700">All</button>
-    <?php
-    $cat_query = mysqli_query($conn, "SELECT DISTINCT category FROM products");
-    while($cat = mysqli_fetch_assoc($cat_query)) {
-        echo '<button onclick="filterCategory(\''.addslashes($cat['category']).'\')" class="category-btn bg-white text-gray-600 border border-gray-200 px-6 py-2 rounded-full font-medium shadow-sm transition hover:bg-gray-50">'.htmlspecialchars($cat['category']).'</button>';
-    }
-    ?>
-</div>
+$sql = "SELECT * FROM products";
+if ($category !== 'All') {
+    $sql .= " WHERE category = '" . mysqli_real_escape_string($conn, $category) . "'";
+}
 
-<section id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 transition-opacity duration-300">
-<?php
-$query = mysqli_query($conn, "SELECT * FROM products");
+$query = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($query)) {
 ?>
     <div class="card bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col">
@@ -40,7 +27,5 @@ while ($row = mysqli_fetch_assoc($query)) {
         </div>
     </div>
 <?php
-} // closes while loop properly
+}
 ?>
-</section>
-<?php include 'footer.php'; ?>

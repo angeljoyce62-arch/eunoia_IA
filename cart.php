@@ -1,101 +1,81 @@
-<!DOCTYPE html>
-<html>
+<?php
+include 'header.php';
+?>
 
-<head>
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">Your Shopping Cart</h1>
+        <p class="text-gray-600">Review your items before proceeding to checkout.</p>
+    </div>
 
-<title>Cart</title>
+    <div id="cartItems" class="space-y-4 mb-8">
+        <!-- Items will be injected here by JS -->
+    </div>
 
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="ui_improvements.css">
-<link rel="stylesheet" href="ui_improvements.css">
+    <div id="cartSummary" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hidden">
+        <div class="flex justify-between items-center mb-6">
+            <span class="text-xl font-medium text-gray-600">Total Amount:</span>
+            <span id="total" class="text-3xl font-extrabold text-blue-600">₱0.00</span>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <a href="index.php" class="flex-1 text-center py-3 border border-gray-200 rounded-lg font-medium text-gray-600 hover:bg-gray-50 transition">Continue Shopping</a>
+            <a href="checkout.php" class="flex-1 text-center py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">Proceed to Checkout</a>
+        </div>
+    </div>
 
-</head>
-
-<body>
-
-
-<div class="logo-container" style="justify-content:center;">
-	<img src="images/logo.jpg" class="logo" alt="Eunoia IA Logo">
-	<span style="font-size:2em;font-weight:bold;vertical-align:middle;">Shopping Cart</span>
-</div>
-
-<div id="cartItems"
-class="products"></div>
-
-<div style="text-align:center;">
-
-<h2 id="total"></h2>
-
-<a href="checkout.php">
-
-<button>
-Proceed to Checkout
-</button>
-
-</a>
-
+    <div id="emptyCart" class="text-center py-20 hidden">
+        <div class="text-6xl mb-4">🛒</div>
+        <h2 class="text-2xl font-bold text-gray-800">Your cart is empty</h2>
+        <p class="text-gray-500 mb-8">Looks like you haven't added anything yet.</p>
+        <a href="index.php" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Browse Products</a>
+    </div>
 </div>
 
 <script>
+    function renderCart() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const container = document.getElementById("cartItems");
+        const summary = document.getElementById("cartSummary");
+        const empty = document.getElementById("emptyCart");
+        
+        if (cart.length === 0) {
+            container.innerHTML = "";
+            summary.classList.add("hidden");
+            empty.classList.remove("hidden");
+            return;
+        }
 
-let cart =
-JSON.parse(localStorage.getItem("cart")) || [];
+        empty.classList.add("hidden");
+        summary.classList.remove("hidden");
+        
+        let total = 0;
+        container.innerHTML = cart.map((item, index) => {
+            const subtotal = item.price * item.qty;
+            total += subtotal;
+            return `
+                <div class="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-between shadow-sm">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 text-lg">${item.name}</h3>
+                        <p class="text-gray-500">₱${parseFloat(item.price).toLocaleString()} × ${item.qty}</p>
+                    </div>
+                    <div class="text-right flex items-center gap-6">
+                        <span class="font-bold text-gray-900">₱${subtotal.toLocaleString()}</span>
+                        <button onclick="removeItem(${index})" class="text-red-500 hover:text-red-700 font-medium text-sm">Remove</button>
+                    </div>
+                </div>`;
+        }).join('');
 
-let output = "";
+        document.getElementById("total").innerText = "₱" + total.toLocaleString();
+    }
 
-let total = 0;
+    function removeItem(index) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+    }
 
-cart.forEach((item,index)=>{
-
-let subtotal =
-item.price * item.qty;
-
-total += subtotal;
-
-output += `
-
-<div class="card">
-
-<h3>${item.name}</h3>
-
-<p>₱${item.price}</p>
-
-<p>Quantity: ${item.qty}</p>
-
-<p>Subtotal: ₱${subtotal}</p>
-
-<button onclick="removeItem(${index})">
-
-Remove
-
-</button>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("cartItems")
-.innerHTML = output;
-
-document.getElementById("total")
-.innerHTML = "Total: ₱" + total;
-
-function removeItem(index){
-
-cart.splice(index,1);
-
-localStorage.setItem(
-"cart",
-JSON.stringify(cart)
-);
-
-location.reload();
-
-}
-
+    document.addEventListener('DOMContentLoaded', renderCart);
 </script>
 
-</body>
-</html>
+<?php include 'footer.php'; ?>
