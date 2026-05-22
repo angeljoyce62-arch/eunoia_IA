@@ -137,15 +137,7 @@ include 'header.php';
                 <p class="text-xs text-slate-500">Sign in to your account to browse, curate, or manage listings.</p>
             </div>
 
-            <!-- Seller Help Notification -->
-            <div class="bg-primary-50/70 border border-primary-100 p-3.5 rounded-xl text-xs text-primary-700 leading-relaxed font-medium mb-6 flex items-start gap-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-primary-600 shrink-0 mt-0.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708.283a.75.75 0 00-.475.68v.553m-.25-6.75h.008v.008h-.008v-.008zM12 18a.375.375 0 110-.75.375.375 0 010.75 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <strong>Seller Login Help:</strong> Access the pre-existing store admin dashboard using username <code class="bg-primary-100 px-1 py-0.5 rounded text-[10px] font-mono font-bold">eunoia_IA</code> and password <code class="bg-primary-100 px-1 py-0.5 rounded text-[10px] font-mono font-bold">seller123</code>.
-                </div>
-            </div>
+
 
             <!-- Form Body -->
             <form method="POST" class="space-y-5">
@@ -203,7 +195,5 @@ include 'header.php';
 
     </div>
 </div>
-
-<?php include 'footer.php'; ?>
 
 <?php include 'footer.php'; ?>

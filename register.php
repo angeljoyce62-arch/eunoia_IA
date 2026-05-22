@@ -51,10 +51,15 @@ include 'header.php';
                     </svg>
                     <span><?php echo $success; ?></span>
                 </div>
+                <script>
+                // Redirect to login after 3 seconds
+                setTimeout(function() {
+                    window.location.href = 'login.php';
+                }, 3000);
+                </script>
             <?php endif; ?>
 
-            <!-- Default Role as Customer -->
-            <input type="hidden" name="role" id="roleInput" value="customer">
+           
 
             <!-- Username -->
             <div class="space-y-1.5">

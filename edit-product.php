@@ -48,16 +48,23 @@ if(isset($_POST['update'])){
     $price = $_POST['price'];
     $stock = $_POST['stock'];
     $category = $_POST['category'];
+    $available_colors = $_POST['available_colors'] ?? '';
     $description = $_POST['description'];
     
     // Check if new image is uploaded
+
     if (!empty($_FILES['image']['name'])) {
         $image = $_FILES['image']['name'];
         $tmp = $_FILES['image']['tmp_name'];
         
         if (move_uploaded_file($tmp, "images/".$image)) {
-            $stmt_update = $conn->prepare("UPDATE products SET name = ?, price = ?, stock = ?, category = ?, description = ?, image = ? WHERE id = ? AND seller_id = ?");
-            $stmt_update->bind_param("sdisssii", $name, $price, $stock, $category, $description, $image, $id, $seller_id);
+            $stmt_update = $conn->prepare("UPDATE products SET name = ?, price = ?, stock = ?, category = ?, available_colors = ?, description = ?, image = ? WHERE id = ? AND seller_id = ?");
+            $stmt_update->bind_param("sdisssisi", $name, $price, $stock, $category, $available_colors, $description, $image, $id, $seller_id);
+
+
+
+
+
             $stmt_update->execute();
             $msg = "Curation listed details & image updated successfully!";
         } else {
@@ -65,8 +72,10 @@ if(isset($_POST['update'])){
         }
     } else {
         // Update details without changing image
-        $stmt_update = $conn->prepare("UPDATE products SET name = ?, price = ?, stock = ?, category = ?, description = ? WHERE id = ? AND seller_id = ?");
-        $stmt_update->bind_param("sdissii", $name, $price, $stock, $category, $description, $id, $seller_id);
+        $stmt_update = $conn->prepare("UPDATE products SET name = ?, price = ?, stock = ?, category = ?, available_colors = ?, description = ? WHERE id = ? AND seller_id = ?");
+        $stmt_update->bind_param("sdisssii", $name, $price, $stock, $category, $available_colors, $description, $id, $seller_id);
+
+
         $stmt_update->execute();
         $msg = "Curation listed details updated successfully!";
     }
@@ -164,10 +173,19 @@ if(isset($_POST['update'])){
 
             <!-- Description -->
             <div class="space-y-1.5">
+                <label class="text-xs font-bold font-heading text-slate-500 uppercase tracking-widest block">Available Colors (comma-separated)</label>
+                <input type="text" name="available_colors" value="<?php echo htmlspecialchars($product['available_colors'] ?? ''); ?>" 
+                       placeholder="e.g. Red,Blue,Black" 
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:bg-white transition-all">
+                <p class="text-[10px] text-slate-400 italic">Enter colors separated by commas.</p>
+            </div>
+
+            <div class="space-y-1.5">
                 <label class="text-xs font-bold font-heading text-slate-500 uppercase tracking-widest block">Curation Narrative Description</label>
                 <textarea name="description" required 
                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:bg-white transition-all h-36 resize-none"><?php echo htmlspecialchars($product['description']); ?></textarea>
             </div>
+
 
             <!-- Image Upload (Optional update) -->
             <div class="space-y-1.5">

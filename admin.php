@@ -1,9 +1,9 @@
 <?php
+include 'config.php'; // config.php now starts the session
 if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin'){
     header("Location: login.php");
     exit();
 }
-include 'config.php';
 include 'facebook_util.php';
 include 'header.php';
 
@@ -13,12 +13,19 @@ if(isset($_POST['add'])){
     $price = $_POST['price'];
     $description = $_POST['description'];
     $stock = $_POST['stock'] ?? 0;
+    $category = $_POST['category'] ?? 'General';
+    $available_colors = $_POST['available_colors'] ?? '';
     $image = $_FILES['image']['name'];
     $tmp = $_FILES['image']['tmp_name'];
     
     if(move_uploaded_file($tmp, "images/".$image)){
-        $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, stock, seller_id) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sdssii", $name, $price, $image, $description, $stock, $_SESSION['user_id']);
+        // Ensure all products are assigned to the primary seller 'eunoia_IA'
+        $seller_res = $conn->query("SELECT id FROM users WHERE username = 'eunoia_IA' LIMIT 1");
+        $seller_data = $seller_res->fetch_assoc();
+        $target_seller_id = $seller_data['id'] ?? 2;
+
+        $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, stock, category, available_colors, seller_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sdssissi", $name, $price, $image, $description, $stock, $category, $available_colors, $target_seller_id);
         $stmt->execute();
 
         // Facebook auto-post
@@ -55,6 +62,14 @@ if(isset($_GET['delete'])){
                     <input type="text" name="name" placeholder="Product Name" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     <input type="number" step="0.01" name="price" placeholder="Price" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     <input type="number" name="stock" placeholder="Initial Stock" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <select name="category" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="Furniture">Furniture Selection</option>
+                        <option value="Apparel">Luxury Apparel</option>
+                        <option value="Decor">Artisanal Decor</option>
+                        <option value="Lighting">Ambient Lighting</option>
+                        <option value="General">General Curations</option>
+                    </select>
+                    <input type="text" name="available_colors" placeholder="Available Colors (e.g. Red,Blue)" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     <textarea name="description" placeholder="Description" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none h-24"></textarea>
                     <input type="file" name="image" required class="text-sm">
                     <button name="add" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition">Upload Product</button>

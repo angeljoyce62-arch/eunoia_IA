@@ -92,7 +92,28 @@ $isOwner = ($role === 'seller' && $_SESSION['user_id'] == $product['seller_id'])
                         <?php echo nl2br($prodDesc); ?>
                     </p>
                 </div>
+
+                <!-- Available Colors -->
+                <div class="space-y-2">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available colors</h4>
+                    <?php
+                        $colorsRaw = $product['available_colors'] ?? '';
+                        $colors = array_values(array_filter(array_map('trim', explode(',', $colorsRaw))));
+                    ?>
+                    <?php if (!empty($colors)): ?>
+                        <div class="flex flex-wrap gap-2">
+                            <?php foreach ($colors as $c): ?>
+                                <span class="px-2 py-1 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                                    <?php echo htmlspecialchars($c); ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-slate-500 text-sm">No colors provided.</p>
+                    <?php endif; ?>
+                </div>
             </div>
+
 
             <!-- Financial Details & Actions -->
             <div class="pt-8 border-t border-slate-100 space-y-6">

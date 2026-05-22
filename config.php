@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Database configuration
 $servername = "localhost";
 $username   = "root";
@@ -11,19 +15,20 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Retrieve dynamic shop settings from database
-$shop_query = mysqli_query($conn, "SELECT * FROM shop_settings WHERE id = 1");
+// Retrieve dynamic shop settings from database (table may not exist if DB was recreated)
+$shop_settings = [
+    'shop_name' => 'eunoia_IA',
+    'shop_logo' => '',
+    'shop_description' => 'Your clean, modern, and user-friendly standard e-commerce shop.',
+    'shop_phone' => '09123456789',
+    'shop_email' => 'contact@eunoia.com'
+];
+
+$shop_query = @mysqli_query($conn, "SELECT * FROM shop_settings WHERE id = 1");
 if ($shop_query && mysqli_num_rows($shop_query) > 0) {
     $shop_settings = mysqli_fetch_assoc($shop_query);
-} else {
-    $shop_settings = [
-        'shop_name' => 'eunoia_IA',
-        'shop_logo' => '',
-        'shop_description' => 'Your clean, modern, and user-friendly standard e-commerce shop.',
-        'shop_phone' => '09123456789',
-        'shop_email' => 'contact@eunoia.com'
-    ];
 }
+
 
 // Curated luxury images fallback helper
 function getProductImage($imageName, $category = 'General') {

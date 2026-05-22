@@ -112,10 +112,7 @@ if ($role !== 'customer') {
                             <label class="text-xs font-bold font-heading text-slate-500 uppercase tracking-widest block">GCash Mobile Number</label>
                             <div class="relative">
                                 <input type="text" id="gcash_number" placeholder="e.g. 09171234567" pattern="^(09)\d{9}$" title="Please enter a valid 11-digit GCash number starting with 09"
-                                       class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#007DFE] focus:bg-white transition-all">
-                                <div class="absolute left-3.5 top-3.5 text-slate-400">
-                                    <span class="text-xs font-bold text-slate-400">+63</span>
-                                </div>
+                                       class="w-full pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#007DFE] focus:bg-white transition-all">
                             </div>
                             <p class="text-[10px] text-slate-400 italic">Formatting requirement: 11 digits starting with 09 (e.g. 09XXXXXXXXX)</p>
                         </div>
@@ -146,11 +143,8 @@ if ($role !== 'customer') {
                         <div class="space-y-1.5">
                             <label class="text-xs font-bold font-heading text-slate-500 uppercase tracking-widest block">Recipient Phone Number</label>
                             <div class="relative">
-                                <input type="text" id="cod_phone" placeholder="e.g. 09171234567" pattern="^(09)\d{9}$" title="Please enter a valid 11-digit mobile number starting with 09"
-                                       class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all">
-                                <div class="absolute left-3.5 top-3.5 text-slate-400">
-                                    <span class="text-xs font-bold text-slate-400">+63</span>
-                                </div>
+                                    <input type="text" id="cod_phone" placeholder="e.g. 09171234567" pattern="^(09)\d{9}$" title="Please enter a valid 11-digit mobile number starting with 09"
+                                        class="w-full pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all">
                             </div>
                             <p class="text-[10px] text-slate-400 italic">Formatting requirement: 11 digits starting with 09 (e.g. 09XXXXXXXXX)</p>
                         </div>

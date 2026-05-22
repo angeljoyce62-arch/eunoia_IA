@@ -108,12 +108,31 @@ $role = $_SESSION['role'] ?? null;
 
                         <!-- Price and Stock Details -->
                         <div class="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between">
+
                             <span class="text-lg font-heading font-black text-primary-600">
                                 ₱<?php echo $prodPrice; ?>
                             </span>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded <?php echo $row['stock'] > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'; ?>">
                                 <?php echo $row['stock'] > 0 ? 'Stock: ' . $row['stock'] : 'Out of stock'; ?>
                             </span>
+                        </div>
+
+                        <!-- Available Colors -->
+                        <div class="mt-2">
+                            <?php
+                                $colorsRaw = $row['available_colors'] ?? '';
+                                $colors = array_values(array_filter(array_map('trim', explode(',', $colorsRaw))));
+                            ?>
+                            <?php if (!empty($colors)): ?>
+                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Available colors</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <?php foreach ($colors as $c): ?>
+                                        <span class="px-2 py-1 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200"><?php echo htmlspecialchars($c); ?></span>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
                         </div>
 
                         <!-- Dynamic Action Control depending on Account Role -->

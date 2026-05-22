@@ -52,53 +52,76 @@ if (isset($_POST['update_settings'])) {
 
 // Add Product Logic
 if(isset($_POST['add'])){
-    $name = $_POST['name'];
+    $name = trim($_POST['name']);
     $price = $_POST['price'];
-    $description = $_POST['description'];
-    $stock = $_POST['stock'];
+    $description = trim($_POST['description']);
+    $stock = intval($_POST['stock']);
     $category = $_POST['category'];
-    $image = $_FILES['image']['name'];
+    $available_colors = trim($_POST['available_colors'] ?? '');
+
+    $image = basename($_FILES['image']['name']);
     $tmp = $_FILES['image']['tmp_name'];
-    
+    $upload_error = $_FILES['image']['error'] ?? UPLOAD_ERR_NO_FILE;
+
     // Ensure images directory exists
     if (!is_dir("images")) {
         mkdir("images", 0777, true);
     }
 
-    if(move_uploaded_file($tmp, "images/".$image)){
-        $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, stock, category, seller_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sdssisi", $name, $price, $image, $description, $stock, $category, $seller_id);
-        $stmt->execute();
-        $msg = "Luxury curation listed successfully!";
-        $active_tab = 'inventory'; // view active stock immediately
+    if (!empty($image) && $upload_error === UPLOAD_ERR_OK && is_uploaded_file($tmp)) {
+        if (move_uploaded_file($tmp, "images/" . $image)) {
+            $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, stock, category, available_colors, seller_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sdssissi", $name, $price, $image, $description, $stock, $category, $available_colors, $seller_id);
+
+            if ($stmt->execute()) {
+                $msg = "Luxury curation listed successfully!";
+                $active_tab = 'inventory';
+            } else {
+                $msg_err = "Failed to save product listing. Please try again.";
+            }
+        } else {
+            $msg_err = "Failed to upload curation image.";
+        }
     } else {
-        $msg_err = "Failed to upload curation image.";
+        $msg_err = "Please choose a valid image before publishing your product.";
     }
 }
 
 // Deletion Logic (Security: Only delete if product belongs to this seller)
 if(isset($_GET['delete'])){
-    $prod_id = $_GET['delete'];
-    
-    // Perform transaction delete on order_items first or delete product
-    mysqli_begin_transaction($conn);
-    try {
-        // Delete related order items
-        $stmt1 = $conn->prepare("DELETE FROM order_items WHERE product_id = ?");
-        $stmt1->bind_param("i", $prod_id);
-        $stmt1->execute();
+    $prod_id = intval($_GET['delete']);
+    // Check if product belongs to this seller
+    $stmt_check = $conn->prepare("SELECT id FROM products WHERE id = ? AND seller_id = ?");
+    $stmt_check->bind_param("ii", $prod_id, $seller_id);
+    $stmt_check->execute();
+    $result_check = $stmt_check->get_result();
+    if ($result_check->num_rows === 0) {
+        $msg_err = "Product not found or does not belong to your account.";
+    } else {
+        $conn->begin_transaction();
+        try {
+            // Delete related order items
+            $stmt1 = $conn->prepare("DELETE FROM order_items WHERE product_id = ?");
+            $stmt1->bind_param("i", $prod_id);
+            $stmt1->execute();
 
-        // Delete actual product
-        $stmt2 = $conn->prepare("DELETE FROM products WHERE id = ? AND seller_id = ?");
-        $stmt2->bind_param("ii", $prod_id, $seller_id);
-        $stmt2->execute();
-        
-        mysqli_commit($conn);
-        header("Location: seller_dashboard.php?tab=inventory");
-        exit();
-    } catch (Exception $e) {
-        mysqli_rollback($conn);
-        $msg_err = "Failed to delete listing. It is associated with active customer orders.";
+            // Delete actual product
+            $stmt2 = $conn->prepare("DELETE FROM products WHERE id = ? AND seller_id = ?");
+            $stmt2->bind_param("ii", $prod_id, $seller_id);
+            $stmt2->execute();
+
+            if ($stmt2->affected_rows > 0) {
+                $conn->commit();
+                header("Location: seller_dashboard.php?tab=inventory&msg=deleted");
+                exit();
+            } else {
+                $conn->rollback();
+                $msg_err = "Failed to delete listing. It may be associated with active orders or already deleted.";
+            }
+        } catch (Exception $e) {
+            $conn->rollback();
+            $msg_err = "Failed to delete listing. It is associated with active customer orders.";
+        }
     }
 }
 
@@ -127,7 +150,7 @@ $total_revenue = $rev_res['total_revenue'] ?? 0.00;
     <div class="mb-10 border-b border-slate-100 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
             <h1 class="text-3xl font-heading font-black text-secondary-900 tracking-tight">Business Operations</h1>
-            <p class="text-xs text-slate-500">Oversee your boutique products catalog, stock, and monitor sales metrics.</p>
+                <p class="text-xs text-slate-500">Oversee your boutique products catalog, stock, and monitor sales metrics.</p>
         </div>
         <div class="bg-luxury-gold/10 border border-luxury-gold/25 text-luxury-gold px-4 py-2 rounded-xl text-xs font-bold font-heading uppercase tracking-wider">
             Verified Merchant Workspace
@@ -153,7 +176,7 @@ $total_revenue = $rev_res['total_revenue'] ?? 0.00;
                 📦
             </div>
             <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Active Curation Listings</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Active Product Listings</p>
                 <p class="text-2xl font-heading font-black text-secondary-900"><?php echo $stats['total'] ?? 0; ?> items</p>
             </div>
         </div>
@@ -347,7 +370,7 @@ $total_revenue = $rev_res['total_revenue'] ?? 0.00;
         <!-- LIST NEW PRODUCT FORM SCREEN -->
         <div class="bg-white border border-slate-100 shadow-xl rounded-3xl p-8 max-w-2xl mx-auto">
             <div class="mb-6 border-b border-slate-100 pb-4">
-                <h3 class="text-lg font-heading font-black text-secondary-900">List New Masterpiece</h3>
+                <h3 class="text-lg font-heading font-black text-secondary-900">List New Product</h3>
                 <p class="text-xs text-slate-400">Add detailed specs and high-resolution thumbnail upload to showcase your product.</p>
             </div>
             
@@ -381,12 +404,21 @@ $total_revenue = $rev_res['total_revenue'] ?? 0.00;
                     <label class="text-xs font-bold font-heading text-slate-500 uppercase tracking-widest block">Bespoke Category</label>
                     <select name="category" required 
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:bg-white transition-all">
-                        <option value="Furniture">Furniture Selection</option>
-                        <option value="Apparel">Luxury Apparel</option>
-                        <option value="Decor" selected>Artisanal Decor</option>
-                        <option value="Lighting">Ambient Lighting</option>
-                        <option value="General">General Curations</option>
+<option value="Furniture">Type Selection</option>
+                    <option value="Apparel">Tops</option>
+                    <option value="Decor">T-shirts</option>
+                    <option value="Lighting">Jeans</option>
+                    <option value="General">Perfume</option>
+                    <option value="General">Sandals</option>
                     </select>
+                </div>
+
+                <!-- Colors -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold font-heading text-slate-500 uppercase tracking-widest block">Available Colors (comma-separated)</label>
+                    <input type="text" name="available_colors" placeholder="e.g. Red,Blue,Black" 
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:bg-white transition-all">
+                    <p class="text-[10px] text-slate-400 italic">Enter colors separated by commas.</p>
                 </div>
 
                 <!-- Description -->
@@ -395,6 +427,7 @@ $total_revenue = $rev_res['total_revenue'] ?? 0.00;
                     <textarea name="description" placeholder="Describe the crafting material, dimensions, inspiration..." required 
                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-600 focus:bg-white transition-all h-32 resize-none"></textarea>
                 </div>
+
 
                 <!-- Image Upload -->
                 <div class="space-y-1.5">
@@ -405,7 +438,7 @@ $total_revenue = $rev_res['total_revenue'] ?? 0.00;
 
                 <!-- Submit Listing -->
                 <button name="add" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary-100 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all duration-300">
-                    Publish Luxury Curation Listing
+                    Publish Product Listing
                 </button>
             </form>
         </div>

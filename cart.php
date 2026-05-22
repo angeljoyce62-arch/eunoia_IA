@@ -256,4 +256,4 @@ if ($role !== 'customer') {
     document.addEventListener('DOMContentLoaded', renderShoppingBag);
 </script>
  
-<?php include 'footer.php'; ?>clude 'footer.php'; ?>
+<?php include 'footer.php'; ?>

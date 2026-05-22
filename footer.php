@@ -10,8 +10,8 @@
                     <div class="flex items-center gap-3">
                         <?php
                         $shop_logo_path = '';
-                        if (!empty($shop_settings['shop_logo']) && file_exists(__DIR__ . '/' . $shop_settings['shop_logo'])) {
-                            $shop_logo_path = $shop_settings['shop_logo'];
+                        if (!empty($shop_settings['shop_logo']) && file_exists(__DIR__ . '/images/' . $shop_settings['shop_logo'])) {
+                            $shop_logo_path = 'images/' . $shop_settings['shop_logo'];
                         }
                         if ($shop_logo_path): ?>
                             <img src="<?php echo $shop_logo_path; ?>" alt="<?php echo htmlspecialchars($shop_settings['shop_name']); ?>" class="h-8 max-w-[120px] object-contain">
