@@ -161,7 +161,10 @@ if (!empty($rawPhone)) {
                             $subtotal = $item['price'] * $item['quantity'];
                         ?>
                         <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="py-2.5 font-medium text-slate-800 leading-tight"><?php echo htmlspecialchars($item['name']); ?></td>
+                            <td class="py-2.5 font-medium text-slate-800 leading-tight">
+                                <?php echo htmlspecialchars($item['name']); ?><br>
+                                <span class="text-[9px] text-primary-600 font-bold uppercase tracking-tighter">Color: <?php echo htmlspecialchars($item['color'] ?? 'Default'); ?></span>
+                            </td>
                             <td class="py-2.5 text-center text-slate-500"><?php echo $item['quantity']; ?></td>
                             <td class="py-2.5 text-right font-mono font-bold text-slate-800">₱<?php echo number_format($subtotal, 2); ?></td>
                         </tr>

@@ -53,10 +53,11 @@ try {
         $itemId = $item['id'];
         $itemQty = $item['qty'];
         $itemPrice = $item['price'];
+        $itemColor = $item['color'] ?? 'Default';
 
         // Insert item details into order_items
-        $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
-        $stmt_item->bind_param("iiid", $order_id, $itemId, $itemQty, $itemPrice);
+        $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price, color) VALUES (?, ?, ?, ?, ?)");
+        $stmt_item->bind_param("iiids", $order_id, $itemId, $itemQty, $itemPrice, $itemColor);
         $stmt_item->execute();
 
         // Update active stock in products (ensure it doesn't drop below 0 by checking)

@@ -95,17 +95,20 @@ $isOwner = ($role === 'seller' && $_SESSION['user_id'] == $product['seller_id'])
 
                 <!-- Available Colors -->
                 <div class="space-y-2">
-                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available colors</h4>
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Curation Color</h4>
                     <?php
                         $colorsRaw = $product['available_colors'] ?? '';
                         $colors = array_values(array_filter(array_map('trim', explode(',', $colorsRaw))));
                     ?>
                     <?php if (!empty($colors)): ?>
-                        <div class="flex flex-wrap gap-2">
-                            <?php foreach ($colors as $c): ?>
-                                <span class="px-2 py-1 text-[10px] font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                                    <?php echo htmlspecialchars($c); ?>
-                                </span>
+                        <div class="flex flex-wrap gap-2" id="colorSelector">
+                            <?php foreach ($colors as $index => $c): ?>
+                                <label class="cursor-pointer select-none">
+                                    <input type="radio" name="selected_color" value="<?php echo htmlspecialchars($c); ?>" class="peer hidden" <?php echo $index === 0 ? 'checked' : ''; ?>>
+                                    <span class="inline-block px-3 py-1.5 text-[10px] font-bold rounded-full bg-white text-slate-600 border border-slate-200 peer-checked:bg-primary-600 peer-checked:text-white peer-checked:border-primary-600 transition-all cursor-pointer">
+                                        <?php echo htmlspecialchars($c); ?>
+                                    </span>
+                                </label>
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
@@ -167,11 +170,13 @@ $isOwner = ($role === 'seller' && $_SESSION['user_id'] == $product['seller_id'])
                                 <div class="flex-grow flex flex-col gap-1">
                                     <label class="text-[10px] font-bold text-transparent select-none uppercase tracking-widest block">Buy</label>
                                     <div class="flex gap-2">
-                                        <button onclick="handleDetailAddCart(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $product['price']; ?>, document.getElementById('detailQty').value, event)" 
+                                        <button onclick="const col = document.querySelector('input[name=\'selected_color\']:checked')?.value || 'Default'; 
+                                                         handleDetailAddCart(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $product['price']; ?>, document.getElementById('detailQty').value, col, event)" 
                                                 class="flex-grow bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl transition-all duration-300">
                                             Add to Cart
                                         </button>
-                                        <button onclick="handleDetailBuyNow(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $product['price']; ?>, document.getElementById('detailQty').value)" 
+                                        <button onclick="const col = document.querySelector('input[name=\'selected_color\']:checked')?.value || 'Default'; 
+                                                         handleDetailBuyNow(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $product['price']; ?>, document.getElementById('detailQty').value, col)" 
                                                 class="flex-grow bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary-100 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all duration-300">
                                             Buy Now
                                         </button>
@@ -192,7 +197,7 @@ $isOwner = ($role === 'seller' && $_SESSION['user_id'] == $product['seller_id'])
 </div>
 
 <script>
-    function handleDetailAddCart(id, name, price, qty, event) {
+    function handleDetailAddCart(id, name, price, qty, color, event) {
         <?php if (!isset($_SESSION['role'])): ?>
             window.location.href = 'login.php';
             return;
@@ -204,10 +209,10 @@ $isOwner = ($role === 'seller' && $_SESSION['user_id'] == $product['seller_id'])
         if (typeof animateFlyToCart === 'function') {
             animateFlyToCart(id, event);
         }
-        addToCart(id, name, price, qty);
+        addToCart(id, name, price, qty, color);
     }
 
-    function handleDetailBuyNow(id, name, price, qty) {
+    function handleDetailBuyNow(id, name, price, qty, color) {
         <?php if (!isset($_SESSION['role'])): ?>
             window.location.href = 'login.php';
             return;
@@ -217,7 +222,7 @@ $isOwner = ($role === 'seller' && $_SESSION['user_id'] == $product['seller_id'])
         <?php endif; ?>
         
         if (typeof buyNowDirect === 'function') {
-            buyNowDirect(id, name, price, qty);
+            buyNowDirect(id, name, price, qty, color);
         }
     }
 </script>

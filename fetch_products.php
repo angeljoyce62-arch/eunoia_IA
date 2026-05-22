@@ -7,13 +7,18 @@ include 'config.php';
 $category = $_GET['category'] ?? 'All';
 $role = $_SESSION['role'] ?? null;
 
-$sql = "SELECT p.*, u.username as seller_name FROM products p JOIN users u ON p.seller_id = u.id";
+$sql = "SELECT p.*, u.username as seller_name FROM products p JOIN users u ON p.seller_id = u.id WHERE 1=1";
 if ($category !== 'All') {
-    $sql .= " WHERE p.category = '" . mysqli_real_escape_string($conn, $category) . "'";
+    $sql .= " AND p.category = ?";
 }
 $sql .= " ORDER BY p.id DESC";
 
-$query = mysqli_query($conn, $sql);
+$stmt = $conn->prepare($sql);
+if ($category !== 'All') {
+    $stmt->bind_param("s", $category);
+}
+$stmt->execute();
+$query = $stmt->get_result();
 if(mysqli_num_rows($query) === 0) {
     echo '<div class="col-span-full text-center py-16"><h3 class="text-slate-400 font-heading font-semibold text-lg">No products found in this category.</h3></div>';
     exit;
@@ -30,7 +35,7 @@ while ($row = mysqli_fetch_assoc($query)) {
     $isOwner = ($role === 'seller' && $_SESSION['user_id'] == $row['seller_id']);
 ?>
     <!-- Elegant Card -->
-    <div class="card group bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 rounded-2xl p-4 transition-all duration-300 flex flex-col relative overflow-hidden">
+    <div class="card group bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 rounded-2xl p-4 transition-all duration-300 flex flex-col h-full relative overflow-hidden">
         
         <!-- Category Badge Tag -->
         <span class="absolute top-6 left-6 z-10 bg-white/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-slate-600 px-2.5 py-1 rounded-md border border-slate-100">
@@ -57,7 +62,7 @@ while ($row = mysqli_fetch_assoc($query)) {
                 <p class="text-[10px] text-slate-400 mt-0.5">
                     Boutique: <span class="font-semibold text-slate-500"><?php echo $sellerName; ?></span>
                 </p>
-                <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed min-h-[32px]">
                     <?php echo $prodDesc; ?>
                 </p>
             </div>
@@ -72,8 +77,29 @@ while ($row = mysqli_fetch_assoc($query)) {
                 </span>
             </div>
 
-            <!-- Dynamic Action Control depending on Account Role -->
-            <div class="pt-3 w-full">
+            <!-- Available Colors -->
+            <div class="mt-2 min-h-[48px]">
+                <?php
+                    $colorsRaw = $row['available_colors'] ?? '';
+                    $colors = array_values(array_filter(array_map('trim', explode(',', $colorsRaw))));
+                ?>
+                <?php if (!empty($colors)): ?>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Available colors</div>
+                    <div class="flex flex-wrap gap-1.5" id="colorSelector_<?php echo $prodId; ?>">
+                        <?php foreach ($colors as $index => $c): ?>
+                            <label class="cursor-pointer select-none">
+                                <input type="radio" name="color_<?php echo $prodId; ?>" value="<?php echo htmlspecialchars($c); ?>" class="peer hidden" <?php echo $index === 0 ? 'checked' : ''; ?>>
+                                <span class="inline-block px-2 py-1 text-[9px] font-bold rounded-full bg-slate-50 text-slate-500 border border-slate-200 peer-checked:bg-primary-600 peer-checked:text-white peer-checked:border-primary-600 transition-all cursor-pointer">
+                                    <?php echo htmlspecialchars($c); ?>
+                                </span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="pt-4 w-full border-t border-slate-100 mt-auto">
                 <?php if ($role === 'seller'): ?>
                     <?php if ($isOwner): ?>
                         <a href="edit-product.php?id=<?php echo $prodId; ?>" 
@@ -92,12 +118,14 @@ while ($row = mysqli_fetch_assoc($query)) {
                             <div class="flex gap-2">
                                 <input type="number" id="qty<?php echo $prodId; ?>" value="1" min="1" max="<?php echo $row['stock']; ?>" 
                                        class="w-14 px-1 py-2 text-center text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary-600">
-                                <button onclick="handleAddCart(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $row['price']; ?>, document.getElementById('qty<?php echo $prodId; ?>').value, event)" 
+                                <button onclick="const col = document.querySelector('input[name=\'color_<?php echo $prodId; ?>\']:checked')?.value || 'Default'; 
+                                                 handleAddCart(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $row['price']; ?>, document.getElementById('qty<?php echo $prodId; ?>').value, col, event)" 
                                         class="flex-grow bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 rounded-xl active:scale-[0.99] transition-all duration-300">
                                     Add to Cart
                                 </button>
                             </div>
-                            <button onclick="handleBuyNow(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $row['price']; ?>, document.getElementById('qty<?php echo $prodId; ?>').value)" 
+                            <button onclick="const col = document.querySelector('input[name=\'color_<?php echo $prodId; ?>\']:checked')?.value || 'Default'; 
+                                             handleBuyNow(<?php echo $prodId; ?>, '<?php echo addslashes($prodName); ?>', <?php echo $row['price']; ?>, document.getElementById('qty<?php echo $prodId; ?>').value, col)" 
                                     class="w-full bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold py-2.5 rounded-xl active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-1 shadow-sm shadow-primary-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

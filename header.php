@@ -14,44 +14,12 @@ $role = $_SESSION['role'] ?? null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eunoia IA — Premium E-Commerce</title>
-    <!-- Tailwind CSS v3 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Outfit & Inter -->
+    <!-- Compiled Tailwind CSS -->
+    <link href="css/output.css" rel="stylesheet">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f5f3ff',
-                            100: '#ede9fe',
-                            600: '#7c3aed', // Purple
-                            700: '#6d28d9',
-                            800: '#5b21b6',
-                            900: '#4c1d95',
-                        },
-                        secondary: {
-                            50: '#f8fafc',
-                            100: '#f1f5f9',
-                            800: '#1e293b', // Slate
-                            900: '#0f172a',
-                        },
-                        luxury: {
-                            gold: '#c5a880',
-                            charcoal: '#1a1a1a',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        heading: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;

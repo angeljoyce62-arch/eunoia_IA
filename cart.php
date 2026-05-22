@@ -157,7 +157,7 @@ if ($role !== 'customer') {
                         <!-- Name & Subdetails -->
                         <div class="min-w-0">
                             <h3 class="font-heading font-bold text-secondary-900 leading-snug truncate">${item.name}</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">₱${parseFloat(item.price).toLocaleString('en-US', {minimumFractionDigits: 2})} &bull; Qty: ${item.qty}</p>
+                            <p class="text-xs text-slate-400 mt-0.5">₱${parseFloat(item.price).toLocaleString('en-US', {minimumFractionDigits: 2})} &bull; Qty: ${item.qty} &bull; <span class="text-primary-600 font-bold">${item.color || 'Default'}</span></p>
                         </div>
                     </div>
 

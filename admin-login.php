@@ -29,7 +29,7 @@ if(isset($_POST['login'])){
 <html>
 <head>
 <title>Admin Login</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<link href="css/output.css" rel="stylesheet">
 </head>
 <body class="bg-slate-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">

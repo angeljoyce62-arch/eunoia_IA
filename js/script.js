@@ -56,7 +56,7 @@ function showToast(message, type = 'success') {
 }
 
 // Add Item to Cart
-function addToCart(id, name, price, qty){
+function addToCart(id, name, price, qty, color = 'Default'){
     qty = parseInt(qty);
     if (isNaN(qty) || qty <= 0) {
         showToast("Please enter a valid quantity.", "warning");
@@ -66,7 +66,7 @@ function addToCart(id, name, price, qty){
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     
     // Check if item already exists in cart
-    let existingIndex = cart.findIndex(item => item.id === id);
+    let existingIndex = cart.findIndex(item => item.id === id && item.color === color);
     if (existingIndex !== -1) {
         cart[existingIndex].qty += qty;
     } else {
@@ -74,7 +74,8 @@ function addToCart(id, name, price, qty){
             id: id,
             name: name,
             price: parseFloat(price),
-            qty: qty
+            qty: qty,
+            color: color
         });
     }
 
@@ -83,7 +84,7 @@ function addToCart(id, name, price, qty){
     // Dispatch custom event to notify header badge
     window.dispatchEvent(new Event('cartUpdated'));
     
-    showToast(`Added ${qty} × ${name} to your cart successfully!`);
+    showToast(`Added ${qty} × ${name} (${color}) to your cart successfully!`);
 }
 
 /* LIVE STORE SEARCH */
@@ -211,7 +212,7 @@ function animateFlyToCart(productId, event) {
 }
 
 /* DIRECT BUY-NOW FUNCTION */
-function buyNowDirect(id, name, price, qty) {
+function buyNowDirect(id, name, price, qty, color = 'Default') {
     qty = parseInt(qty);
     if (isNaN(qty) || qty <= 0) {
         showToast("Please enter a valid quantity.", "warning");
@@ -221,7 +222,7 @@ function buyNowDirect(id, name, price, qty) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     
     // Add or update quantity in permanent cart
-    let existingIndex = cart.findIndex(item => item.id === id);
+    let existingIndex = cart.findIndex(item => item.id === id && item.color === color);
     if (existingIndex !== -1) {
         cart[existingIndex].qty = qty;
     } else {
@@ -229,7 +230,8 @@ function buyNowDirect(id, name, price, qty) {
             id: id,
             name: name,
             price: parseFloat(price),
-            qty: qty
+            qty: qty,
+            color: color
         });
     }
 
@@ -241,7 +243,8 @@ function buyNowDirect(id, name, price, qty) {
         id: id,
         name: name,
         price: parseFloat(price),
-        qty: qty
+        qty: qty,
+        color: color
     };
     
     // Store only this item for checkout.php to pull

@@ -240,7 +240,7 @@ if ($role !== 'customer') {
         <div class="flex justify-between items-start gap-4">
             <div class="min-w-0 flex-grow">
                 <p class="text-xs font-bold text-secondary-900 leading-snug truncate">${item.name}</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">Qty: ${item.qty} &bull; ₱${parseFloat(item.price).toLocaleString('en-US')}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Qty: ${item.qty} &bull; Color: ${item.color || 'Default'} &bull; ₱${parseFloat(item.price).toLocaleString('en-US')}</p>
             </div>
             <span class="text-xs font-heading font-bold text-slate-700 shrink-0">₱${(item.price * item.qty).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
         </div>
